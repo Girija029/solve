@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Cumulative Report</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            background-color: #fff;
+            padding: 20px;
+        }
+    
+        /* MAIN CONTAINER */
+        .report-container {
+            width: 950px;
+            margin: auto;
+        }
+    
+        /* HEADER */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+    
+        .header img {
+            width: 70px;
+        }
+    
+        .header-text h2 {
+            margin: 2px 0;
+            font-size: 22px;
+            text-transform: uppercase;
+        }
+    
+        .header-text h4 {
+            margin: 2px 0;
+            font-size: 16px;
+        }
+    
+        .header-text p {
+            margin: 2px 0;
+            font-size: 15px;
+            font-weight: bold;
+        }
+    
+        /* DETAILS ROW */
+        .details-row {
+            display: flex;
+            justify-content: space-between;
+            width: 90%;
+            margin: 10px auto;
+            font-weight: bold;
+            font-size: 14px;
+        }
+    
+        /* TABLE */
+        table {
+            width: 90%;
+            margin: 10px auto;
+            border-collapse: collapse;
+            text-align: center;
+            font-size: 13px;
+        }
+    
+        th,
+        td {
+            border: 1px solid #000;
+            padding: 6px 5px;
+        }
+    
+        th {
+            background-color: #f2f2f2;
+        }
+    
+        td.name-cell {
+            text-align: left;
+        }
+    
+        .fail-text {
+            color: red;
+            font-weight: bold;
+        }
+    
+        /* SUMMARY */
+        .summary-section {
+            margin-top: 15px;
+        }
+    
+        .fail-summary-table {
+            margin: 10px auto;
+        }
+    
+        .subject-summary-table {
+            width: 90%;
+            margin: 10px auto;
+        }
+    
+        .subject-summary-table td.left {
+            text-align: left;
+        }
+    
+        .overall-box {
+            width: 90%;
+            margin: 10px auto;
+            font-weight: bold;
+            font-size: 14px;
+        }
+    
+        /* SIGNATURE */
+        .sign-row {
+            width: 90%;
+            margin: 40px auto 0;
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+        }
+    
+        /* BUTTONS */
+        .controls {
+            margin-top: 20px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-family: sans-serif;
+            text-align: center;
+        }
+    
+        .btn {
+            padding: 8px 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+        }
+    
+        .btn-primary {
+            background: #0d6efd;
+            color: white;
+        }
+    
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            margin-left: 10px;
+        }
+    
+        /* PRINT FIX */
+        @media print {
+            .controls {
+                display: none;
+            }
+    
+            .report-container {
+                width: 100%;
+            }
+    
+            table {
+                width: 100%;
+            }
+    
+            body {
+                padding: 5px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="report-container">
+
+        <!-- YOUR FULL EXISTING CODE -->
+    <body>
+    
+        <!-- HEADER -->
+        <div class="header">
+            <img src="{{ url_for('static', filename='logo.png.jpeg') }}" alt="Logo">
+            <div class="header-text">
+                <h2>Kings College of Engineering</h2>
+                <h4>Department of Computer Science and Engineering</h4>
+                <p>Academic Year {{ settings[0] }} / {{ settings[1] }} Semester</p>
+                <p>Cumulative {{ exam }}</p>
+            </div>
+        </div>
+    
+        <!-- DETAILS -->
+        <div class="details-row">
+            <span>Year/Branch/Section: {{ class_name }}</span>
+            <span>Strength: {{ report_data|length }}</span>
+        </div>
+    
+        <!-- MAIN MARKS TABLE -->
+        <table>
+            <thead>
+                <tr>
+                    <th rowspan="2">S.No</th>
+                    <th rowspan="2">Roll.No</th>
+                    <th rowspan="2" style="text-align:left;">Student Name</th>
+                    {% for sub in subjects %}
+                    <th><br><small>{{ subject_info[sub].code }}</small></th>
+                    {% endfor %}
+                    <th rowspan="2">No. of<br>Subjects<br>Failed</th>
+                </tr>
+                <tr>
+                    {% for sub in subjects %}
+                    <th style="font-size:11px;">{{ sub }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in report_data %}
+                <tr>
+                    <td>{{ row.sno }}</td>
+                    <td>{{ row.roll_no }}</td>
+                    <td class="name-cell">{{ row.name }}</td>
+                    {% for mark in row.marks %}
+                    <td class="{% if mark == 'AB' or (mark != '-' and mark|int < 25) %}fail-text{% endif %}">
+                        {{ mark }}
+                    </td>
+                    {% endfor %}
+                    <td class="{% if row.failed > 0 %}fail-text{% endif %}">
+                        {{ row.failed }}
+                    </td>
+                </tr>
+                {% endfor %}
+                <!-- Pass % row -->
+                <tr>
+                    <td colspan="3"><b>Subject Pass %</b></td>
+                    {% for sub in subjects %}
+                    <td><b>{{ subject_percentage[sub] }}%</b></td>
+                    {% endfor %}
+                    <td>-</td>
+                </tr>
+            </tbody>
+        </table>
+    
+        <!-- BOTTOM SUMMARY SECTION -->
+        <div class="summary-section">
+    
+            <!-- Fail summary row -->
+            <table class="fail-summary-table" style="width:auto; margin-bottom:8px;">
+                <tr>
+                    <th style="text-align:left; background:#f2f2f2;">No. of Subjects Failed</th>
+                    <th>All Clear</th>
+                    <th>1</th>
+                    <th>2</th>
+                    <th>3</th>
+                    <th>4</th>
+                    <th>5</th>
+                    <th>6</th>
+                </tr>
+                <tr>
+                    <th>No. of Students</th>
+                    {% set ns = namespace(counts=[0,0,0,0,0,0,0]) %}
+                    {% for row in report_data %}
+                    {% if row.failed == 0 %}{% set _ = ns.counts.__setitem__(0, ns.counts[0]+1) %}{% endif %}
+                    {% if row.failed == 1 %}{% set _ = ns.counts.__setitem__(1, ns.counts[1]+1) %}{% endif %}
+                    {% if row.failed == 2 %}{% set _ = ns.counts.__setitem__(2, ns.counts[2]+1) %}{% endif %}
+                    {% if row.failed == 3 %}{% set _ = ns.counts.__setitem__(3, ns.counts[3]+1) %}{% endif %}
+                    {% if row.failed == 4 %}{% set _ = ns.counts.__setitem__(4, ns.counts[4]+1) %}{% endif %}
+                    {% if row.failed == 5 %}{% set _ = ns.counts.__setitem__(5, ns.counts[5]+1) %}{% endif %}
+                    {% if row.failed >= 6 %}{% set _ = ns.counts.__setitem__(6, ns.counts[6]+1) %}{% endif %}
+                    {% endfor %}
+                    {% for cnt in ns.counts %}
+                    <td>{{ cnt }}</td>
+                    {% endfor %}
+                </tr>
+            </table>
+    
+            <!-- Subject-wise summary table -->
+            <table class="subject-summary-table">
+                <thead>
+                    <tr>
+                        <th>S.No</th>
+                        <th>Sub Code</th>
+                        <th>Subject Name</th>
+                        <th>Staff Name</th>
+                        <th>No. of Students Appeared</th>
+                        <th>No. of Students Passed</th>
+                        <th>No. of Students Failed</th>
+                        <th>Pass %</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sub in subjects %}
+                    {% set appeared = subject_counts[sub] %}
+                    {% set passed = subject_pass[sub] %}
+                    {% set failed_count = appeared - passed %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ subject_info[sub].code }}</td>
+                        <td class="left">{{ sub }}</td>
+                        <td class="left">{{ subject_info[sub].staff }}</td>
+                        <td>{{ appeared }}</td>
+                        <td>{{ passed }}</td>
+                        <td>{{ failed_count }}</td>
+                        <td><b>{{ subject_percentage[sub] }}%</b></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+    
+            <!-- Overall pass % -->
+            <div class="overall-box">
+                Overall Pass % : {{ overall_pass_pct }}%
+            </div>
+        </div>
+    
+        <!-- SIGNATURE ROW -->
+        <div class="sign-row">
+            <span>Class Coordinator</span>
+            <span>HoD/CSE</span>
+            <span>Principal</span>
+        </div>
+    
+        <!-- CONTROLS -->
+        <div class="controls">
+            <button class="btn btn-primary" onclick="window.print()">💻 Print / Download Report</button>
+            <a href="/dashboard" class="btn btn-secondary">← Back to Dashboard</a>
+        </div>
+    
+    </body>
+    
+    </html>
+    </div>
+</body>
